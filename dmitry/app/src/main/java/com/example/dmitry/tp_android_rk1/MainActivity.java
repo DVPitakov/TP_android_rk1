@@ -6,7 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ServiceHelper.ServiceHelperListener {
 
     Button btn1;
     ServiceHelper serviceHelper;
@@ -26,5 +26,10 @@ public class MainActivity extends AppCompatActivity {
                 serviceHelper.downMessage("string");
             }
         });
+    }
+
+    @Override
+    public void onServiceDoIt() {
+        Log.d("myLog", "success!!!");
     }
 }

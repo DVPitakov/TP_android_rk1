@@ -25,6 +25,7 @@ public class ServiceHelper {
             instace = new ServiceHelper();
         }
         ServiceHelper.context = context;
+        serviceHelperListener = (ServiceHelperListener) context;
         broadcastSubscribe();
         return instace;
     }
@@ -43,6 +44,7 @@ public class ServiceHelper {
         LocalBroadcastManager.getInstance(context).registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                Log.d("myLog", "broadcast worked");
                 serviceHelperListener.onServiceDoIt();
             }
         }, intentFilter);
