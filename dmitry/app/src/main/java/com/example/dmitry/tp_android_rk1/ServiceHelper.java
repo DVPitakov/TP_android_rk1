@@ -36,6 +36,8 @@ public class ServiceHelper {
         intent.putExtra("val_1", "my string 1");
         intent.putExtra("val_2", "my string 2");
         context.startService(intent);
+        context = null;
+        serviceHelperListener = null;
     }
 
     private static void broadcastSubscribe() {
@@ -49,6 +51,7 @@ public class ServiceHelper {
             }
         }, intentFilter);
     }
+
 
     interface ServiceHelperListener {
         public void onServiceDoIt();

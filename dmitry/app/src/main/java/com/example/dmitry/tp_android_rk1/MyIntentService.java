@@ -19,9 +19,26 @@ public class MyIntentService extends IntentService {
         Log.d("myLog", "onHandleIntent");
         downMessage();
     }
+    @Override
+    public void onCreate() {
+        Log.d("myLog", "was created");
+        super.onCreate();
+    }
+
+    @Override
+    public void onDestroy() {
+        Log.d("myLog", "was destroyed");
+        super.onDestroy();
+    }
 
     private void downMessage() {
         //TODO
+        try {
+            Thread.sleep(8000);
+        }
+        catch(InterruptedException ex) {
+
+        }
         upMessage();
     }
 

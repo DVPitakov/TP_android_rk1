@@ -19,7 +19,9 @@
 
         <service
             android:name=".MyIntentService"
-            android:exported="false"></service>
+            android:exported="false" />
+
+        <activity android:name=".SettingsActivity"></activity>
     </application>
 
 </manifest>
