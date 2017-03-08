@@ -41,11 +41,12 @@ public class ServiceHelper {
     private static final Map<Integer, ServiceHelperListener> listeners = new Hashtable<>();
     private static MainActivity backgroundListener;
     public boolean enableBackground = false;
+
     ServiceHelper() {
 
     }
 
-    public static ServiceHelper getInstace(Context context) {
+    synchronized public static ServiceHelper getInstace(Context context) {
         if(instace == null) {
             instace = new ServiceHelper();
             broadcastSubscribe(context);
@@ -67,7 +68,11 @@ public class ServiceHelper {
         else if (action.equals(GET_LAST_BACKGROUND)) {}
 
         context.startService(intent);
-        return counter++;
+        counter++;
+        if (counter < 0) {
+            counter = 1;
+        }
+        return counter;
     }
 
     public void setBackgroundListener(MainActivity listener) {
@@ -79,6 +84,8 @@ public class ServiceHelper {
         }
         backgroundListener = listener;
     }
+
+    //if (background == null) setBackgroundListener
     public void schedule() {
         enableBackground = true;
         Intent intent = new Intent(backgroundListener, MyIntentService.class);

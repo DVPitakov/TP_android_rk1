@@ -100,9 +100,7 @@ public class MyIntentService extends IntentService {
     }
 
     private void saveLastNews(int id, News news) {
-        Storage storage;
-        storage = Storage.getInstance(this);
-        storage.saveNews(news);
+        Storage.getInstance(this).saveNews(news);
     }
 
     private void getNews(int id, String topic) {
