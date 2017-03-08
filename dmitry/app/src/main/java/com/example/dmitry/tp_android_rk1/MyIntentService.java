@@ -28,58 +28,44 @@ public class MyIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        int id = intent.getIntExtra("contextId", -1);
+        int id = intent.getIntExtra(ServiceHelper.CALLBACK_ID, -1);
         String action = intent.getAction();
 
-        if (action.equals("getCurrentTopic")) {
+        if (action.equals(ServiceHelper.GET_LAST_TOPIC)) {
             getCurrentTopic(id);
         }
-        else if (action.equals("setCurrentTopic")) {
-            String topic = intent.getStringExtra("topic");
+        else if (action.equals(ServiceHelper.SAVE_CURRENT_TOPIC)) {
+            String topic = intent.getStringExtra(ServiceHelper.TOPIC);
             loadCurrentTopic(id, topic);
         }
-        else if (action.equals("getLastNews")) {
+        else if (action.equals(ServiceHelper.GET_LAST_NEWS)) {
             getLastNews(id);
         }
-        else if (action.equals("saveInBg")) {
+        else if (action.equals(ServiceHelper.SAVE_BACKGROUND_ENABLE)) {
             Storage.getInstance(this).saveIsUpdateInBg(true);
         }
-        else if (action.equals("saveNotInBg")) {
+        else if (action.equals(ServiceHelper.SAVE_BACKGROUND_DICABLE)) {
             Storage.getInstance(this).saveIsUpdateInBg(false);
         }
-        else if (action.equals("getNews")) {
-            Log.d("myLog", "step_3 getNews");
+        else if (action.equals(ServiceHelper.GET_NEWS)) {
             String topic = Storage.getInstance(this).loadCurrentTopic();
             if (topic == null) {
                 topic = Topics.AUTO;
             }
             getNews(id, topic);
         }
-        else if (action.equals("historyBackground")) {
+        else if (action.equals(ServiceHelper.GET_LAST_BACKGROUND)) {
             boolean inBg = Storage.getInstance(this).loadIsUpdateInBg();
             Intent intentAns = new Intent();
-            intentAns.setAction("historyBackgroundAns");
-            intentAns.putExtra("inBg", inBg);
+            intentAns.setAction(ServiceHelper.GET_LAST_BACKGROUND_ANS);
+            intentAns.putExtra(ServiceHelper.BACKGROUND_STATE, inBg);
             LocalBroadcastManager.getInstance(this).sendBroadcast(intentAns);
         }
 
     }
-    @Override
-    public void onCreate() {
-        Log.d("myLog", "was created");
-        super.onCreate();
-    }
-
-    @Override
-    public void onDestroy() {
-        Log.d("myLog", "was destroyed");
-        super.onDestroy();
-    }
 
     private void loadCurrentTopic(int id, String string) {
-        Storage storage;
-        storage = Storage.getInstance(this);
-        storage.saveCurrentTopic(string);
+        Storage.getInstance(this).saveCurrentTopic(string);
 
     }
 
@@ -88,9 +74,9 @@ public class MyIntentService extends IntentService {
         if (!(str.equals(Topics.IT) || str.equals(Topics.HEALTH))) {
             str = Topics.AUTO;
         }
-        Intent intent = new Intent("getCurrentTopicAns");
-        intent.putExtra("topic", str);
-        intent.putExtra("contextId", id);
+        Intent intent = new Intent(ServiceHelper.GET_CURRENT_TOPIC_ANS);
+        intent.putExtra(ServiceHelper.TOPIC, str);
+        intent.putExtra(ServiceHelper.CALLBACK_ID, id);
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
@@ -98,22 +84,19 @@ public class MyIntentService extends IntentService {
         Storage storage;
         storage = Storage.getInstance(this);
         News news = storage.getLastSavedNews();
+        Intent intent = new Intent(ServiceHelper.GET_NEWS_ANS);
+        intent.putExtra(ServiceHelper.CALLBACK_ID, id);
         if (news == null) {
-            Intent intent = new Intent("getNewsAns");
-            intent.putExtra("contextId", id);
-            intent.putExtra("loadNewsRequestTitle", "unsuccess");
-            intent.putExtra("loadNewsRequestBody", "unsuccess");
-            intent.putExtra("loadNewsRequestDate", -1);
-            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+            intent.putExtra(ServiceHelper.TITLE_FIELD, "err");
+            intent.putExtra(ServiceHelper.BODY_FIELD, "err");
+            intent.putExtra(ServiceHelper.DATE_FIELD, -1);
         }
         else {
-            Intent intent = new Intent("getNewsAns");
-            intent.putExtra("contextId", id);
-            intent.putExtra("loadNewsRequestTitle", news.getTitle());
-            intent.putExtra("loadNewsRequestBody", news.getBody());
-            intent.putExtra("loadNewsRequestDate", news.getDate());
-            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+            intent.putExtra(ServiceHelper.TITLE_FIELD, news.getTitle());
+            intent.putExtra(ServiceHelper.BODY_FIELD, news.getBody());
+            intent.putExtra(ServiceHelper.DATE_FIELD, news.getDate());
         }
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
     private void saveLastNews(int id, News news) {
@@ -123,32 +106,23 @@ public class MyIntentService extends IntentService {
     }
 
     private void getNews(int id, String topic) {
-        Log.d("myLog", "step_4 getNews");
         NewsLoader newsLoader = new NewsLoader();
         News news;
+        Intent intent = new Intent(ServiceHelper.GET_NEWS_ANS);
+        intent.putExtra(ServiceHelper.CALLBACK_ID, id);
         try {
-            Log.d("myLog", "step_5 getNews");
-            Log.d("myLog", "topic" + topic);
             news = newsLoader.loadNews(topic);
-            Log.d("myLog", "///////");
             saveLastNews(id, news);
-            Intent intent = new Intent("getNewsAns");
-            intent.putExtra("contextId", id);
-            intent.putExtra("keepAlive", bl);
-            intent.putExtra("loadNewsRequestTitle", news.getTitle());
-            intent.putExtra("loadNewsRequestBody", news.getBody());
-            intent.putExtra("loadNewsRequestDate", news.getDate());
-            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+            intent.putExtra(ServiceHelper.TITLE_FIELD, news.getTitle());
+            intent.putExtra(ServiceHelper.BODY_FIELD, news.getBody());
+            intent.putExtra(ServiceHelper.DATE_FIELD, news.getDate());
         }
         catch (IOException exeption) {
-            Intent intent = new Intent("getNewsAns");
-            intent.putExtra("contextId", id);
-            intent.putExtra("keepAlive", bl);
-            intent.putExtra("loadNewsRequestTitle", "err");
-            intent.putExtra("loadNewsRequestBody", "err");
-            intent.putExtra("loadNewsRequestDate", -1);
-            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+            intent.putExtra(ServiceHelper.TITLE_FIELD, "err");
+            intent.putExtra(ServiceHelper.BODY_FIELD, "err");
+            intent.putExtra(ServiceHelper.DATE_FIELD, -1);
         }
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
 }

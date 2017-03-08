@@ -17,7 +17,6 @@ public class SettingsActivity extends AppCompatActivity  implements ServiceHelpe
     private RadioButton rbtn1;
     private RadioButton rbtn2;
     private RadioButton rbtn3;
-    private RadioGroup radioGroup;
 
     public static String curTheme;
 
@@ -25,8 +24,6 @@ public class SettingsActivity extends AppCompatActivity  implements ServiceHelpe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
-
-        radioGroup = (RadioGroup) findViewById(R.id.radioGroup);
 
         rbtn1 = (RadioButton) findViewById(R.id.cat_1);
         rbtn2 = (RadioButton) findViewById(R.id.cat_2);
@@ -37,13 +34,13 @@ public class SettingsActivity extends AppCompatActivity  implements ServiceHelpe
         rbtn3.setOnClickListener(this);
 
 
-        ServiceHelper.getInstace(this).downMessage("", "getCurrentTopic", this, this);
+        ServiceHelper.getInstace(this).downMessage("",ServiceHelper.GET_LAST_TOPIC, this, this);
 
     }
 
     @Override
     public void onServiceDoIt(Intent intent) {
-        curTheme = intent.getStringExtra("topic");
+        curTheme = intent.getStringExtra(ServiceHelper.TOPIC);
         if (curTheme.equals(Topics.AUTO)) {
             rbtn1.setChecked(true);
         }
@@ -61,20 +58,17 @@ public class SettingsActivity extends AppCompatActivity  implements ServiceHelpe
         String str = "";
         switch (v.getId()) {
             case R.id.cat_1:
-                Log.d("myLog",  "radio_1");
                 str = Topics.AUTO;
                 break;
 
             case R.id.cat_2:
-                Log.d("myLog",  "radio_2");
                 str = Topics.HEALTH;
                 break;
 
             case R.id.cat_3:
-                Log.d("myLog",  "radio_3");
                 str = Topics.IT;
                 break;
         }
-        ServiceHelper.getInstace(this).downMessage(str, "setCurrentTopic", this, this);
+        ServiceHelper.getInstace(this).downMessage(str, ServiceHelper.SAVE_CURRENT_TOPIC, this, this);
     }
 }

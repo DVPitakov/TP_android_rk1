@@ -17,10 +17,29 @@ import ru.mail.weather.lib.Scheduler;
  */
 
 public class ServiceHelper {
+    public static final String GET_NEWS = "getNews";
+    public static final String GET_LAST_NEWS = "getLastNews";
+    public static final String GET_LAST_BACKGROUND = "getLastBackground";
+    public static final String GET_LAST_TOPIC = "getLastTopic";
+    public static final String SAVE_CURRENT_TOPIC = "saveCurrentTopic";
+    public static final String SAVE_BACKGROUND_ENABLE = "saveBackgroundEnable";
+    public static final String SAVE_BACKGROUND_DICABLE = "saveBackgroundDisable";
+    public static final String CALLBACK_ID = "callbackID";
+    public static final String TOPIC = "topic";
+    public static final String BACKGROUND_STATE = "backgroundState";
+
+    public static final String TITLE_FIELD = "titleFild";
+    public static final String BODY_FIELD = "bodyFild";
+    public static final String DATE_FIELD = "dateFild";
+
+    public static final String GET_NEWS_ANS = "getNewsAns";
+    public static final String GET_CURRENT_TOPIC_ANS = "getLastTopicState";
+    public static final String GET_LAST_BACKGROUND_ANS = "setCurrentTopic";
+
     private static ServiceHelper instace;
     private static int counter = 1;
     private static final Map<Integer, ServiceHelperListener> listeners = new Hashtable<>();
-    public static MainActivity backgroundListener;
+    private static MainActivity backgroundListener;
     public boolean enableBackground = false;
     ServiceHelper() {
 
@@ -38,80 +57,64 @@ public class ServiceHelper {
         listeners.put(counter, listener);
         Intent intent = new Intent(context, MyIntentService.class);
         intent.setAction(action);
-        intent.putExtra("contextId", counter);
-        if (action.equals("getNewsAction")) {
-            Log.d("myLog", "ServiceHelper.downMessage");
+        intent.putExtra(CALLBACK_ID, counter);
+        if (action.equals(GET_LAST_TOPIC)) {}
+        else if (action.equals(SAVE_CURRENT_TOPIC)) {
+            intent.putExtra(TOPIC, str);
         }
-        else if (action.equals("getCurrentTopic")) {
-            context.startService(intent);
-        }
-        else if (action.equals("setCurrentTopic")) {
-            intent.putExtra("topic", str);
-            context.startService(intent);
-        }
-        else if (action.equals("getLastNews")) {
-            context.startService(intent);
-        }
-        else if (action.equals("getNews")) {
-            Log.d("myLog", "ServiceHelper->getNews");
-            context.startService(intent);
-        }
-        else if (action.equals("historyBackground")) {
-            context.startService(intent);
-        }
+        else if (action.equals(GET_LAST_NEWS)) {}
+        else if (action.equals(GET_NEWS)) {}
+        else if (action.equals(GET_LAST_BACKGROUND)) {}
 
+        context.startService(intent);
         return counter++;
     }
 
     public void setBackgroundListener(MainActivity listener) {
         if (enableBackground) {
             Intent intent = new Intent(backgroundListener, MyIntentService.class);
-            intent.setAction("getNews");
+            intent.setAction(GET_NEWS);
             Scheduler.getInstance().unschedule(backgroundListener, intent);
             Scheduler.getInstance().schedule(listener, intent, 10000);
         }
         backgroundListener = listener;
     }
     public void schedule() {
-        Log.d("myLog", "tg_1");
         enableBackground = true;
         Intent intent = new Intent(backgroundListener, MyIntentService.class);
-        intent.setAction("getNews");
-        intent.putExtra("contextId", -1);
+        intent.setAction(GET_NEWS);
+        intent.putExtra(CALLBACK_ID, -1);
         Scheduler.getInstance().schedule(backgroundListener, intent, 10000);
         Intent saveInBg = new Intent(backgroundListener, MyIntentService.class);
-        saveInBg.setAction("saveInBg");
+        saveInBg.setAction(SAVE_BACKGROUND_ENABLE);
         backgroundListener.startService(saveInBg);
     }
 
     public void unSchedule() {
         enableBackground = false;
         Intent intent = new Intent(backgroundListener, MyIntentService.class);
-        intent.setAction("getNews");
-        intent.putExtra("contextId", -1);
+        intent.setAction(GET_NEWS);
+        intent.putExtra(CALLBACK_ID, -1);
         Scheduler.getInstance().unschedule(backgroundListener, intent);
         Intent saveInBg = new Intent(backgroundListener, MyIntentService.class);
-        saveInBg.setAction("saveNotInBg");
+        saveInBg.setAction(SAVE_BACKGROUND_DICABLE);
         backgroundListener.startService(saveInBg);
         backgroundListener = null;
     }
 
     private static void broadcastSubscribe(Context context) {
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction("getNewsAns");
-        intentFilter.addAction("historyBackgroundAns");
-        intentFilter.addAction("getCurrentTopicAns");
+        intentFilter.addAction(GET_NEWS_ANS);
+        intentFilter.addAction(GET_LAST_BACKGROUND_ANS);
+        intentFilter.addAction(GET_CURRENT_TOPIC_ANS);
         LocalBroadcastManager.getInstance(context).registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
 
-                int requestId = intent.getIntExtra("contextId", -1);
-                boolean keepAlive = intent.getBooleanExtra("keepAlive", false);
+                int requestId = intent.getIntExtra(CALLBACK_ID, -1);
                 ServiceHelperListener serviceHelperListener;
-                Log.d("myLog", "tg_3");
                 if(requestId == -1) {
                     serviceHelperListener = backgroundListener;
-                    Log.d("myLog", "tg_4");
                 }
                 else {
                     serviceHelperListener = listeners.remove(requestId);

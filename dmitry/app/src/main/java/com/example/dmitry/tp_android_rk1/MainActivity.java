@@ -3,7 +3,6 @@ package com.example.dmitry.tp_android_rk1;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -38,8 +37,8 @@ public class MainActivity extends AppCompatActivity implements ServiceHelper.Ser
 
         btnDisableBackgroundUpdate.setEnabled(false);
         btnEnableBackgroundUpdate.setEnabled(false);
-        serviceHelper.downMessage("", "historyBackground", this, this);
-        serviceHelper.downMessage("", "getLastNews", this, this);
+        serviceHelper.downMessage("", ServiceHelper.GET_LAST_BACKGROUND, this, this);
+        serviceHelper.downMessage("", ServiceHelper.GET_LAST_NEWS, this, this);
 
         textTitle = (TextView) findViewById(R.id.textTitle);
         textBody = (TextView) findViewById(R.id.textBody);
@@ -50,12 +49,13 @@ public class MainActivity extends AppCompatActivity implements ServiceHelper.Ser
             @Override
             public void onClick(View v) {
                 ServiceHelper.getInstace(MainActivity.this)
-                        .downMessage("", "getNews", MainActivity.this, MainActivity.this);
+                        .downMessage("", ServiceHelper.GET_NEWS, MainActivity.this, MainActivity.this);
             }
         });
         btnEnableBackgroundUpdate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                ServiceHelper.getInstace(MainActivity.this).setBackgroundListener(MainActivity.this);
                 ServiceHelper.getInstace(MainActivity.this).schedule();
                 btnDisableBackgroundUpdate.setEnabled(true);
                 btnEnableBackgroundUpdate.setEnabled(false);
@@ -78,26 +78,21 @@ public class MainActivity extends AppCompatActivity implements ServiceHelper.Ser
         });
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Log.d("myLog", "destroy MainActivity");
-    }
 
     @Override
     public void onServiceDoIt(Intent intent) {
-        if(intent.getAction().equals("getNewsAns")) {
-            String title = intent.getStringExtra("loadNewsRequestTitle");
-            String body = intent.getStringExtra("loadNewsRequestBody");
-            Long date = intent.getLongExtra("loadNewsRequestDate", -1);
+        if(intent.getAction().equals(ServiceHelper.GET_NEWS_ANS)) {
+            String title = intent.getStringExtra(ServiceHelper.TITLE_FIELD);
+            String body = intent.getStringExtra(ServiceHelper.BODY_FIELD);
+            Long date = intent.getLongExtra(ServiceHelper.DATE_FIELD, -1);
             textTitle.setText(title);
             textBody.setText(body);
             DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
             Date dt = new Date(date);
             textDate.setText(df.format(dt));
         }
-        else if(intent.getAction().equals("historyBackgroundAns")) {
-            Boolean inBg = intent.getBooleanExtra("inBg", false);
+        else if(intent.getAction().equals(ServiceHelper.GET_LAST_BACKGROUND_ANS)) {
+            Boolean inBg = intent.getBooleanExtra(ServiceHelper.BACKGROUND_STATE, false);
             if (started) {
                 started = false;
                 if (inBg) {
