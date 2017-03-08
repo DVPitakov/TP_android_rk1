@@ -19,9 +19,6 @@ import ru.mail.weather.lib.Topics;
 
 public class MyIntentService extends IntentService {
 
-    private static MyIntentService instance;
-    private String topic;
-    private static boolean bl = false;
     public MyIntentService() {
         super("MyIntentService");
     }
