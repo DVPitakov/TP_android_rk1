@@ -1,5 +1,6 @@
 package com.example.dmitry.tp_android_rk1;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -8,25 +9,17 @@ import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
-import static com.example.dmitry.tp_android_rk1.R.id.btn1;
+import ru.mail.weather.lib.Topics;
 
-public class SettingsActivity extends AppCompatActivity implements View.OnClickListener{
+
+public class SettingsActivity extends AppCompatActivity  implements ServiceHelper.ServiceHelperListener,  View.OnClickListener{
 
     private RadioButton rbtn1;
     private RadioButton rbtn2;
     private RadioButton rbtn3;
     private RadioGroup radioGroup;
 
-    public static int curTheme = R.id.cat_1;
-
-    private void setCurTheme() {
-
-    }
-
-    private void saveCurTheme() {
-
-    }
-
+    public static String curTheme;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,26 +36,45 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         rbtn2.setOnClickListener(this);
         rbtn3.setOnClickListener(this);
 
+
+        ServiceHelper.getInstace(this).downMessage("", "getCurrentTopic", this, this);
+
+    }
+
+    @Override
+    public void onServiceDoIt(Intent intent) {
+        curTheme = intent.getStringExtra("topic");
+        if (curTheme.equals(Topics.AUTO)) {
+            rbtn1.setChecked(true);
+        }
+        else if (curTheme.equals(Topics.HEALTH)) {
+            rbtn2.setChecked(true);
+        }
+        else if (curTheme.equals(Topics.IT)) {
+            rbtn3.setChecked(true);
+        }
     }
 
     @Override
     public void onClick(View v) {
 
+        String str = "";
         switch (v.getId()) {
-            case R.id.cat_1: {
+            case R.id.cat_1:
                 Log.d("myLog",  "radio_1");
+                str = Topics.AUTO;
                 break;
-            }
-            case R.id.cat_2: {
+
+            case R.id.cat_2:
                 Log.d("myLog",  "radio_2");
+                str = Topics.HEALTH;
                 break;
-            }
-            case R.id.cat_3: {
+
+            case R.id.cat_3:
                 Log.d("myLog",  "radio_3");
+                str = Topics.IT;
                 break;
-            }
-
-
         }
+        ServiceHelper.getInstace(this).downMessage(str, "setCurrentTopic", this, this);
     }
 }

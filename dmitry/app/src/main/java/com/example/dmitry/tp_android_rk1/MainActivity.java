@@ -6,11 +6,22 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity implements ServiceHelper.ServiceHelperListener {
 
-    Button btn1;
+    private static boolean started = true;
     Button btnSettings;
+    Button btnUpdateNews;
+    Button btnEnableBackgroundUpdate;
+    Button btnDisableBackgroundUpdate;
+    TextView textTitle;
+    TextView textBody;
+    TextView textDate;
     ServiceHelper serviceHelper;
 
     @Override
@@ -18,16 +29,44 @@ public class MainActivity extends AppCompatActivity implements ServiceHelper.Ser
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         serviceHelper = ServiceHelper.getInstace(MainActivity.this);
+        serviceHelper.setBackgroundListener(MainActivity.this);
 
-        btn1 = (Button) findViewById(R.id.btn1);
         btnSettings = (Button) findViewById(R.id.btnSettings);
+        btnUpdateNews = (Button) findViewById(R.id.btnUpdateNews);
+        btnEnableBackgroundUpdate = (Button) findViewById(R.id.btnEnableBackgroundUpdate);
+        btnDisableBackgroundUpdate = (Button) findViewById(R.id.btnDisableBackgroundUpdate);
 
-        btn1.setOnClickListener(new View.OnClickListener() {
+        btnDisableBackgroundUpdate.setEnabled(false);
+        btnEnableBackgroundUpdate.setEnabled(false);
+        serviceHelper.downMessage("", "historyBackground", this, this);
+        serviceHelper.downMessage("", "getLastNews", this, this);
+
+        textTitle = (TextView) findViewById(R.id.textTitle);
+        textBody = (TextView) findViewById(R.id.textBody);
+        textDate = (TextView) findViewById(R.id.textDate);
+
+
+        btnUpdateNews.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("myLog", "button pressed");
-                //TODO
-                serviceHelper.downMessage("string");
+                ServiceHelper.getInstace(MainActivity.this)
+                        .downMessage("", "getNews", MainActivity.this, MainActivity.this);
+            }
+        });
+        btnEnableBackgroundUpdate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ServiceHelper.getInstace(MainActivity.this).schedule();
+                btnDisableBackgroundUpdate.setEnabled(true);
+                btnEnableBackgroundUpdate.setEnabled(false);
+            }
+        });
+        btnDisableBackgroundUpdate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ServiceHelper.getInstace(MainActivity.this).unSchedule();
+                btnEnableBackgroundUpdate.setEnabled(true);
+                btnDisableBackgroundUpdate.setEnabled(false);
             }
         });
         btnSettings.setOnClickListener(new View.OnClickListener() {
@@ -46,8 +85,29 @@ public class MainActivity extends AppCompatActivity implements ServiceHelper.Ser
     }
 
     @Override
-    public void onServiceDoIt() {
-        Log.d("myLog", "success!!!");
-        btn1.setText("success");
+    public void onServiceDoIt(Intent intent) {
+        if(intent.getAction().equals("getNewsAns")) {
+            String title = intent.getStringExtra("loadNewsRequestTitle");
+            String body = intent.getStringExtra("loadNewsRequestBody");
+            Long date = intent.getLongExtra("loadNewsRequestDate", -1);
+            textTitle.setText(title);
+            textBody.setText(body);
+            DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+            Date dt = new Date(date);
+            textDate.setText(df.format(dt));
+        }
+        else if(intent.getAction().equals("historyBackgroundAns")) {
+            Boolean inBg = intent.getBooleanExtra("inBg", false);
+            if (started) {
+                started = false;
+                if (inBg) {
+                    ServiceHelper.getInstace(MainActivity.this).schedule();
+                }
+            }
+            btnEnableBackgroundUpdate.setEnabled(!inBg);
+            btnDisableBackgroundUpdate.setEnabled(inBg);
+        }
+
+
     }
 }

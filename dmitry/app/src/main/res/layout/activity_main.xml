@@ -31,23 +31,23 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
         <Button
-            android:id="@+id/btn1"
-            android:text="btn1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-        <Button
             android:id="@+id/btnUpdateNews"
-            android:text="Update news"
+            android:text="@string/updateNews"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
         <Button
             android:id="@+id/btnEnableBackgroundUpdate"
-            android:text="Enable Background Update"
+            android:text="@string/enableBackgroundUpdate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <Button
+            android:id="@+id/btnDisableBackgroundUpdate"
+            android:text="@string/disableBackgroundUpdate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
         <Button
             android:id="@+id/btnSettings"
-            android:text="Settings"
+            android:text="@string/settings"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     </LinearLayout>

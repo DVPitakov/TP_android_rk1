@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">TP_android_rk1</string>
+    <string name="settings">Настройки</string>
+    <string name="enableBackgroundUpdate">Включить фоновое обновление</string>
+    <string name="disableBackgroundUpdate">Выключить фоновое обновление</string>
+    <string name="updateNews">Обновить новость</string>
+    <string name="auto">Автомобили</string>
+    <string name="health">Здоровье</string>
+    <string name="IT">ИТ</string>
+
 </resources>
